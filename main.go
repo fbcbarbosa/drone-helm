@@ -167,7 +167,7 @@ func run(c *cli.Context) error {
 	plugin := Plugin{
 		Config: Config{
 			APIServer:          c.String("api_server"),
-			Token:              c.String("token"),
+			Token:              c.String("kubernetes_token"),
 			Certificate:        c.String("certificate"),
 			ServiceAccount:     c.String("service-account"),
 			KubeConfig:         c.String("kube-config"),
