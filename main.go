@@ -62,7 +62,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "values_files",
 			Usage:  "Helm values override files",
-			EnvVar: "PLUGIN_VALUES_FILES,VALUES_FILES",
+			EnvVar: "PLUGIN_VALUES_FILES,VALUES_FILES,PLUGIN_FILES,FILES",
 		},
 		cli.BoolTFlag{
 			Name:   "skip_tls_verify",
