@@ -144,6 +144,16 @@ func main() {
 			Usage:  "use ssl communication between helm and tiller",
 			EnvVar: "PLUGIN_TLS,TLS",
 		},
+		cli.StringFlag{
+			Name:   "api_server",
+			Usage:  "Kubernetes api server",
+			EnvVar: "PLUGIN_API_SERVER,API_SERVER,PLUGIN_SERVER,SERVER",
+		},
+		cli.StringFlag{
+			Name:   "kubernetes_token",
+			Usage:  "Kubernetes access token",
+			EnvVar: "PLUGIN_KUBERNETES_TOKEN,KUBERNETES_TOKEN",
+		},
 	}
 	if err := app.Run(os.Args); err != nil {
 		logrus.Fatal(err)
