@@ -314,12 +314,6 @@ func runCommand(params []string) error {
 
 func resolveSecrets(p *Plugin) {
 	p.Config.Values = resolveEnvVar(p.Config.Values, p.Config.Prefix, p.Config.Debug)
-	if p.Config.APIServer == "" {
-		p.Config.APIServer = resolveEnvVar("${API_SERVER}", p.Config.Prefix, p.Config.Debug)
-	}
-	if p.Config.Token == "" {
-		p.Config.Token = resolveEnvVar("${KUBERNETES_TOKEN}", p.Config.Prefix, p.Config.Debug)
-	}
 	if p.Config.Certificate == "" {
 		p.Config.Certificate = resolveEnvVar("${KUBERNETES_CERTIFICATE}", p.Config.Prefix, p.Config.Debug)
 	}

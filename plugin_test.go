@@ -159,19 +159,15 @@ func TestResolveSecrets(t *testing.T) {
 	testEnvs := []struct {
 		prefix  string
 		tag     string
-		api     string
-		token   string
 		account string
 	}{
-		{prefix: "PROD", tag: "v0.1.1", api: "http://apiserver", token: "12345", account: "helm"},
-		{prefix: "STAGING", tag: "12345678", api: "http://apiserver", token: "12345", account: "helm"},
+		{prefix: "PROD", tag: "v0.1.1", account: "helm"},
+		{prefix: "STAGING", tag: "12345678", account: "helm"},
 	}
 	for _, env := range testEnvs {
 		envMap := map[string]string{
-			"TAG":              env.tag,
-			"API_SERVER":       env.api,
-			"KUBERNETES_TOKEN": env.token,
-			"SERVICE_ACCOUNT":  env.account,
+			"TAG":             env.tag,
+			"SERVICE_ACCOUNT": env.account,
 		}
 
 		for envKey, envValue := range envMap {
@@ -188,7 +184,7 @@ func TestResolveSecrets(t *testing.T) {
 				Chart:         "./chart/test",
 				Release:       "test-release",
 				Prefix:        env.prefix,
-				Values:        "image.tag=$TAG,api=${API_SERVER},nameOverride=my-over-app,second.tag=${TAG}",
+				Values:        "image.tag=$TAG,nameOverride=my-over-app,second.tag=${TAG}",
 			},
 		}
 
@@ -200,13 +196,6 @@ func TestResolveSecrets(t *testing.T) {
 		}
 		if strings.Contains(plugin.Config.Values, "${TAG}") {
 			t.Errorf("env var ${TAG} not resolved %s", env.tag)
-		}
-
-		if plugin.Config.APIServer != env.api {
-			t.Errorf("env var ${API_SERVER} not resolved %s", env.api)
-		}
-		if plugin.Config.Token != env.token {
-			t.Errorf("env var ${KUBERNETES_TOKEN} not resolved %s", env.token)
 		}
 		if plugin.Config.ServiceAccount != env.account {
 			t.Errorf("env var ${SERVICE_ACCOUNT} not resolved %s", env.account)
@@ -220,32 +209,22 @@ func TestResolveSecrets(t *testing.T) {
 
 	// Test resolving provided values
 	testInput := []struct {
-		server  string
 		values  string
-		token   string
 		account string
 	}{
-		{server: "http://apiserver2", token: "123456", account: "helm2", values: "aval=test"},
+		{account: "helm2", values: "aval=test"},
 	}
 	for _, input := range testInput {
 		plugin := &Plugin{
 			Config: Config{
-				APIServer:      input.server,
 				ServiceAccount: input.account,
-				Token:          input.token,
 				Values:         input.values,
 			},
 		}
 
 		resolveSecrets(plugin)
-		if plugin.Config.APIServer != input.server {
-			t.Errorf("failed to keep APIServer '%s' got '%s'", input.server, plugin.Config.APIServer)
-		}
 		if plugin.Config.ServiceAccount != input.account {
 			t.Errorf("failed to keep ServiceAccount '%s' got '%s'", input.account, plugin.Config.ServiceAccount)
-		}
-		if plugin.Config.Token != input.token {
-			t.Errorf("failed to keep Token '%s' got '%s'", input.token, plugin.Config.Token)
 		}
 		if plugin.Config.Values != input.values {
 			t.Errorf("failed to keep Values '%s' got '%s'", input.values, plugin.Config.Values)
@@ -264,7 +243,7 @@ func TestDetHelmRepoAdd(t *testing.T) {
 			Chart:         "./chart/test",
 			Release:       "test-release",
 			Prefix:        "MY",
-			Values:        "image.tag=$TAG,api=${API_SERVER},nameOverride=my-over-app,second.tag=${TAG}",
+			Values:        "image.tag=$TAG,nameOverride=my-over-app,second.tag=${TAG}",
 			ClientOnly:    true,
 			HelmRepos: []string{
 				`"r1=http://r1.example.com"`, //handle quoted strings
@@ -345,7 +324,7 @@ func TestSetHelpCommand(t *testing.T) {
 			Chart:         "./chart/test",
 			Release:       "test-release",
 			Prefix:        "MY",
-			Values:        "image.tag=$TAG,api=${API_SERVER},nameOverride=my-over-app,second.tag=${TAG}",
+			Values:        "image.tag=$TAG,nameOverride=my-over-app,second.tag=${TAG}",
 		},
 	}
 	setHelpCommand(plugin)
@@ -365,7 +344,7 @@ func TestDetHelmInit(t *testing.T) {
 			Chart:         "./chart/test",
 			Release:       "test-release",
 			Prefix:        "MY",
-			Values:        "image.tag=$TAG,api=${API_SERVER},nameOverride=my-over-app,second.tag=${TAG}",
+			Values:        "image.tag=$TAG,nameOverride=my-over-app,second.tag=${TAG}",
 			TillerNs:      "system-test",
 		},
 	}
@@ -389,7 +368,7 @@ func TestDetHelmInitClient(t *testing.T) {
 			Chart:         "./chart/test",
 			Release:       "test-release",
 			Prefix:        "MY",
-			Values:        "image.tag=$TAG,api=${API_SERVER},nameOverride=my-over-app,second.tag=${TAG}",
+			Values:        "image.tag=$TAG,nameOverride=my-over-app,second.tag=${TAG}",
 			ClientOnly:    true,
 		},
 	}
@@ -416,7 +395,7 @@ func TestDetHelmInitUpgrade(t *testing.T) {
 			Chart:         "./chart/test",
 			Release:       "test-release",
 			Prefix:        "MY",
-			Values:        "image.tag=$TAG,api=${API_SERVER},nameOverride=my-over-app,second.tag=${TAG}",
+			Values:        "image.tag=$TAG,nameOverride=my-over-app,second.tag=${TAG}",
 			Upgrade:       true,
 		},
 	}
@@ -443,7 +422,7 @@ func TestDetHelmInitCanary(t *testing.T) {
 			Chart:         "./chart/test",
 			Release:       "test-release",
 			Prefix:        "MY",
-			Values:        "image.tag=$TAG,api=${API_SERVER},nameOverride=my-over-app,second.tag=${TAG}",
+			Values:        "image.tag=$TAG,nameOverride=my-over-app,second.tag=${TAG}",
 			CanaryImage:   true,
 		},
 	}
@@ -460,10 +439,7 @@ func TestDetHelmInitCanary(t *testing.T) {
 }
 func TestResolveSecretsFallback(t *testing.T) {
 	tag := "v0.1.1"
-	api := "http://apiserver"
 	os.Setenv("MY_TAG", tag)
-	os.Setenv("MY_API_SERVER", api)
-	os.Setenv("MY_TOKEN", "12345")
 	os.Setenv("NOTTOKEN", "99999")
 
 	plugin := &Plugin{
@@ -476,7 +452,7 @@ func TestResolveSecretsFallback(t *testing.T) {
 			Chart:         "./chart/test",
 			Release:       "test-release",
 			Prefix:        "MY",
-			Values:        "image.tag=$TAG,api=${API_SERVER},nottoken=${NOTTOKEN},nameOverride=my-over-app,second.tag=${TAG}",
+			Values:        "image.tag=$TAG,nottoken=${NOTTOKEN},nameOverride=my-over-app,second.tag=${TAG}",
 		},
 	}
 
@@ -489,9 +465,6 @@ func TestResolveSecretsFallback(t *testing.T) {
 		t.Errorf("env var ${TAG} not resolved %s", tag)
 	}
 
-	if plugin.Config.APIServer != api {
-		t.Errorf("env var ${API_SERVER} not resolved %s", api)
-	}
 	if !strings.Contains(plugin.Config.Values, "99999") {
 		t.Errorf("envar ${NOTTOKEN} has not been resolved to 99999, not using prefix")
 	}
