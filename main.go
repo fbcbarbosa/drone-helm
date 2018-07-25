@@ -64,7 +64,7 @@ func main() {
 			Usage:  "Helm values override files",
 			EnvVar: "PLUGIN_VALUES_FILES,VALUES_FILES",
 		},
-		cli.BoolFlag{
+		cli.BoolTFlag{
 			Name:   "skip_tls_verify",
 			Usage:  "Skip TLS verification",
 			EnvVar: "PLUGIN_SKIP_TLS_VERIFY,SKIP_TLS_VERIFY",
