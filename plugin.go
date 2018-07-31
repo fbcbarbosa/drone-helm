@@ -13,8 +13,11 @@ import (
 	"github.com/alecthomas/template"
 )
 
-var HELM_BIN = "/bin/helm"
-var KUBECONFIG = "/root/.kube/kubeconfig"
+// HelmBin is the path to the Helm binary
+var HelmBin = "/bin/helm"
+
+// KubeConfig is the path to the Kubeconfig
+var KubeConfig = "/root/.kube/kubeconfig"
 
 type (
 	// Config maps the params we need to run Helm
@@ -92,6 +95,16 @@ func setUpgradeCommand(p *Plugin) {
 		upgrade = append(upgrade, "--version")
 		upgrade = append(upgrade, p.Config.Version)
 	}
+
+	for _, env := range os.Environ() {
+		if strings.HasPrefix(env, "DRONE_") {
+			split := strings.SplitN(env, "=", 2)
+			key, val := fmt.Sprintf("drone.labels.%s", strings.ToLower(split[0])), split[1]
+			upgrade = append(upgrade, "--set")
+			upgrade = append(upgrade, fmt.Sprintf("%s=%s", key, val))
+		}
+	}
+
 	if p.Config.Values != "" {
 		upgrade = append(upgrade, "--set")
 		upgrade = append(upgrade, unQuote(p.Config.Values))
@@ -135,6 +148,7 @@ func setUpgradeCommand(p *Plugin) {
 	if p.Config.TLS {
 		upgrade = append(upgrade, "--tls")
 	}
+
 	p.command = upgrade
 
 }
@@ -239,7 +253,7 @@ func (p *Plugin) Exec() error {
 		if p.Config.SkipTLSVerify == false && p.Config.Certificate == "" {
 			return fmt.Errorf("certificate is needed to deploy when SKIP_TLS_VERIFY is false")
 		}
-		initialiseKubeconfig(&p.Config, KUBECONFIG, p.Config.KubeConfig)
+		initialiseKubeconfig(&p.Config, KubeConfig, p.Config.KubeConfig)
 	}
 
 	if p.Config.Debug {
@@ -303,7 +317,7 @@ func initialiseKubeconfig(params *Config, source string, target string) error {
 
 func runCommand(params []string) error {
 	cmd := new(exec.Cmd)
-	cmd = exec.Command(HELM_BIN, params...)
+	cmd = exec.Command(HelmBin, params...)
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -384,7 +398,7 @@ func (p *Plugin) debug() {
 	fmt.Printf("Secrets: %s \n", p.Config.Secrets)
 	fmt.Printf("Helm Repos: %s \n", p.Config.HelmRepos)
 	fmt.Printf("ValuesFiles: %s \n", p.Config.ValuesFiles)
-	kubeconfig, err := ioutil.ReadFile(KUBECONFIG)
+	kubeconfig, err := ioutil.ReadFile(KubeConfig)
 	if err == nil {
 		fmt.Println(string(kubeconfig))
 	}

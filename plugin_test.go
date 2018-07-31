@@ -67,7 +67,7 @@ func TestGetHelmCommandEmptyPushEvent(t *testing.T) {
 	}
 	setHelmCommand(plugin)
 	res := strings.Join(plugin.command[:], " ")
-	expected := "upgrade --install test-release ./chart/test --version 1.2.3 --set image.tag=v.0.1.0,nameOverride=my-over-app --namespace default --dry-run --debug --wait --reuse-values --timeout 500 --force"
+	expected := "upgrade --install test-release ./chart/test --version 1.2.3 --set drone.labels.drone_build_event=push --set image.tag=v.0.1.0,nameOverride=my-over-app --namespace default --dry-run --debug --wait --reuse-values --timeout 500 --force"
 	if res != expected {
 		t.Errorf("Result is %s and we expected %s", res, expected)
 	}
@@ -96,7 +96,7 @@ func TestGetHelmCommandUpgrade(t *testing.T) {
 	}
 	setHelmCommand(plugin)
 	res := strings.Join(plugin.command[:], " ")
-	expected := "upgrade --install test-release ./chart/test --version 1.2.3 --set image.tag=v.0.1.0,nameOverride=my-over-app --namespace default --dry-run --debug --wait --reuse-values --timeout 500 --force"
+	expected := "upgrade --install test-release ./chart/test --version 1.2.3 --set drone.labels.drone_build_event=push --set image.tag=v.0.1.0,nameOverride=my-over-app --namespace default --dry-run --debug --wait --reuse-values --timeout 500 --force"
 	if res != expected {
 		t.Errorf("Result is %s and we expected %s", res, expected)
 	}
