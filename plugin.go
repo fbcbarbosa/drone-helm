@@ -231,13 +231,13 @@ func (p *Plugin) Exec() error {
 	if _, err := os.Stat(p.Config.KubeConfig); os.IsNotExist(err) {
 		resolveSecrets(p)
 		if p.Config.APIServer == "" {
-			return fmt.Errorf("Error: API Server is needed to deploy.")
+			return fmt.Errorf("API Server is needed to deploy")
 		}
 		if p.Config.Token == "" {
-			return fmt.Errorf("Error: Token is needed to deploy.")
+			return fmt.Errorf("token is needed to deploy")
 		}
 		if p.Config.SkipTLSVerify == false && p.Config.Certificate == "" {
-			return fmt.Errorf("Error: Certificate is needed to deploy when SKIP_TLS_VERIFY is false.")
+			return fmt.Errorf("certificate is needed to deploy when SKIP_TLS_VERIFY is false")
 		}
 		initialiseKubeconfig(&p.Config, KUBECONFIG, p.Config.KubeConfig)
 	}
@@ -249,7 +249,7 @@ func (p *Plugin) Exec() error {
 	init := doHelmInit(p)
 	err := runCommand(init)
 	if err != nil {
-		return fmt.Errorf("Error running helm command: " + strings.Join(init[:], " "))
+		return fmt.Errorf("error running helm command: " + strings.Join(init[:], " "))
 	}
 
 	if len(p.Config.HelmRepos) > 0 {
@@ -261,7 +261,7 @@ func (p *Plugin) Exec() error {
 				}
 
 				if err = runCommand(repoAdd); err != nil {
-					return fmt.Errorf("Error adding helm repo: " + err.Error())
+					return fmt.Errorf("error adding helm repo: " + err.Error())
 				}
 			} else {
 				return err
@@ -271,7 +271,7 @@ func (p *Plugin) Exec() error {
 
 	if p.Config.UpdateDependencies {
 		if err = runCommand(doDependencyUpdate(p.Config.Chart)); err != nil {
-			return fmt.Errorf("Error updating dependencies: " + err.Error())
+			return fmt.Errorf("error updating dependencies: " + err.Error())
 		}
 	}
 
@@ -283,7 +283,7 @@ func (p *Plugin) Exec() error {
 
 	err = runCommand(p.command)
 	if err != nil {
-		return fmt.Errorf("Error running helm command: " + strings.Join(p.command[:], " "))
+		return fmt.Errorf("error running helm command: " + strings.Join(p.command[:], " "))
 	}
 
 	return nil
